@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Co-60 Treatment Time Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Palette: charcoal / muted lavender / pale silver / sage-grey / dusty plum */
+    --charcoal:#252D35;
+    --charcoal-soft:#3A4550;
+    --lavender:#B7B2C9;
+    --lavender-soft:#ECE9F2;
+    --lavender-ink:#6F6A86;
+    --silver:#F1EFF3;
+    --sage:#A7B7B0;
+    --sage-soft:#E8EEEB;
+    --plum:#8B6269;
+    --plum-deep:#6E4B52;
+    --plum-soft:#F4EBED;
+    --page:#E3E0EC;
+    --card:#F1EFF3;
+    --lav-tint:#DEDAEA;
+    --sage-tint:#D3DFD9;
+    --line:#DAD6E2;
+    --muted:#5B6370;
+    --mono-num:'Spectral', serif;
+    --sans:'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:linear-gradient(180deg,#CFCADD 0,#E3E0EC 380px,#E3E0EC 100%) no-repeat,var(--page);color:var(--charcoal);font-family:var(--sans);line-height:1.5;padding:32px 16px 64px;-webkit-text-size-adjust:100%;}
+  button{font-family:var(--sans);}
+  .wrap{max-width:760px;margin:0 auto;}
+
+  /* ---------- Header ---------- */
+  .hero{background:var(--charcoal);border-radius:18px;overflow:hidden;margin-bottom:22px;box-shadow:0 10px 28px rgba(37,45,53,0.18);}
+  .strip{display:flex;height:8px;}
+  .strip i{display:block;height:100%;}
+  .strip i:nth-child(1){flex:2;background:var(--charcoal-soft);}
+  .strip i:nth-child(2){flex:1.35;background:var(--lavender);}
+  .strip i:nth-child(3){flex:2;background:var(--silver);}
+  .strip i:nth-child(4){flex:1;background:var(--sage);}
+  .strip i:nth-child(5){flex:1;background:var(--plum);}
+  .hero-inner{display:grid;grid-template-columns:1.35fr 1fr;align-items:center;gap:8px;padding:30px 28px 30px 30px;}
+  h1{font-family:var(--sans);font-weight:700;font-size:44px;line-height:1.05;letter-spacing:-0.015em;margin:0 0 6px;color:var(--silver);}
+  .hero-title{font-weight:600;font-size:24px;line-height:1.25;margin:0 0 16px;color:var(--lavender);}
+  .hero-tags{margin:0;font-size:13px;letter-spacing:0.05em;text-transform:uppercase;color:var(--sage);}
+  .hero-tags.accent{color:#D9B5BC;margin-top:4px;}
+  .sub{color:#C9C6D6;font-size:14px;max-width:46ch;margin:16px 0 0;}
+  .hero-art{width:100%;max-width:290px;justify-self:end;display:block;}
+
+  /* ---------- Cards and form ---------- */
+  .card{background:var(--card);border:1px solid #D2CEDD;border-radius:12px;padding:22px 22px 24px;margin-bottom:18px;box-shadow:0 2px 8px rgba(37,45,53,0.05);}
+  .card h2{font-size:15px;margin:-22px -22px 18px;padding:13px 22px;background:var(--lav-tint);color:var(--charcoal);font-weight:600;border-left:5px solid var(--plum);border-radius:11px 11px 0 0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+  .card.sage{background:var(--sage-soft);border-color:#C3D1CA;}
+  .card.sage h2{background:var(--sage-tint);border-left-color:var(--charcoal);}
+  .card h2 .opt{font-weight:400;color:var(--muted);font-size:13px;}
+  .hint{font-size:12.5px;color:var(--muted);margin:0 0 12px;}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px;}
+  input, select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:6px;font-family:var(--sans);font-size:14.5px;background:#fff;color:var(--charcoal);}
+  input:focus, select:focus, button:focus-visible, summary:focus-visible{outline:2px solid var(--plum);outline-offset:1px;}
+  input::placeholder{color:#9A9FA9;}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;}
+  .full{margin-bottom:12px;}
+
+  .technique-toggle{display:flex;gap:10px;margin-bottom:16px;}
+  .tech-btn{flex:1;padding:12px;border:1.5px solid var(--line);border-radius:8px;text-align:center;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--muted);background:#fff;}
+  .tech-btn.active{border-color:var(--charcoal);color:var(--silver);background:var(--charcoal);}
+  .tech-btn.active .sub-line{color:var(--lavender);}
+  .tech-btn .sub-line{display:block;font-weight:400;font-size:11.5px;color:var(--muted);margin-top:2px;}
+
+  .field-block{border:1px dashed var(--sage);border-radius:8px;padding:14px;margin-bottom:12px;position:relative;background:var(--sage-soft);}
+  .field-block .field-title{font-size:12.5px;color:var(--plum);font-weight:600;margin-bottom:10px;}
+  .remove-field{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;padding:0;}
+  .remove-field:hover{color:var(--plum);}
+  .manual-box{display:none;border-top:1px solid var(--line);margin-top:4px;padding-top:12px;}
+  .range-warn{display:none;background:var(--plum-soft);border-left:3px solid var(--plum);border-radius:4px;padding:10px 14px;margin:0 0 12px;font-size:13px;color:#4F353B;}
+  .range-warn ul{margin:6px 0 6px;padding-left:18px;}
+  .range-warn p{margin:0;}
+
+  button.add-field{background:none;border:1px solid var(--charcoal);color:var(--charcoal);padding:8px 14px;border-radius:6px;font-size:13.5px;cursor:pointer;}
+  button.add-field:hover{background:var(--charcoal);color:#fff;}
+  .calc-btn{width:100%;background:var(--charcoal);color:#fff;border:none;padding:14px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-top:6px;}
+  .calc-btn:hover{background:var(--charcoal-soft);}
+  .ghost-btn{width:100%;background:none;color:var(--muted);border:1px solid var(--line);padding:10px;border-radius:8px;font-size:13.5px;cursor:pointer;margin:10px 0 18px;}
+  .ghost-btn:hover{border-color:var(--plum);color:var(--plum-deep);}
+  .checkbox-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .checkbox-row input{width:auto;accent-color:var(--charcoal);}
+  .checkbox-row label{margin:0;font-size:13.5px;color:var(--charcoal);}
+
+  /* ---------- Messages ---------- */
+  .note{font-size:13px;color:var(--charcoal);background:var(--lav-tint);border-left:4px solid var(--plum);padding:10px 14px;border-radius:4px;margin-bottom:18px;}
+  .error-box{display:none;background:var(--plum-soft);border:1px solid var(--plum);border-radius:10px;padding:16px 18px;margin:12px 0 18px;color:#4F353B;font-size:13.5px;}
+  .error-box b{display:block;margin-bottom:6px;color:var(--plum-deep);}
+  .error-box ul{margin:0;padding-left:18px;}
+  .rate-note{font-size:12.5px;color:var(--plum-deep);margin-top:6px;}
+
+  /* ---------- Result ---------- */
+  .result{background:var(--charcoal);color:var(--silver);border-radius:12px;border-top:5px solid var(--plum);box-shadow:0 8px 22px rgba(37,45,53,0.2);padding:24px 22px;margin-bottom:18px;display:none;}
+  .result.show{display:block;}
+  .result .label{font-size:13px;color:var(--lavender);margin-bottom:6px;}
+  .result .time{font-family:var(--mono-num);font-size:44px;font-weight:600;line-height:1;}
+  .result .time span{font-size:18px;font-weight:400;color:var(--lavender);margin-left:6px;}
+  .result-patient{font-size:13px;color:var(--lavender);margin:0 0 14px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.15);}
+  .result.stale .time, .result.stale .breakdown, .result.stale .result-patient{opacity:0.4;}
+  .stale-msg{display:none;background:var(--plum);color:#fff;border-radius:6px;padding:8px 12px;font-size:13px;margin-bottom:14px;}
+  .result-actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:16px;}
+  .breakdown-toggle{font-size:13px;color:var(--lavender);cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;}
+  .save-btn{background:var(--lavender);color:var(--charcoal);border:none;padding:10px 18px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;}
+  .save-btn:hover:not(:disabled){background:#CBC7D9;}
+  .save-btn:disabled{opacity:0.55;cursor:not-allowed;}
+  .save-status{font-size:13px;color:var(--lavender);}
+  .save-status.bad{color:#F0C9CF;}
+  .breakdown{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.2);font-size:13.5px;display:none;}
+  .breakdown.show{display:block;}
+  .breakdown table{width:100%;border-collapse:collapse;margin-bottom:10px;}
+  .breakdown td{padding:4px 0;color:#DDDAE6;vertical-align:top;}
+  .breakdown td:last-child{text-align:right;font-family:var(--mono-num);padding-left:12px;}
+  .breakdown .formula{background:rgba(255,255,255,0.08);border-radius:6px;padding:10px 12px;font-family:var(--mono-num);font-size:13.5px;color:#fff;overflow-wrap:anywhere;}
+  .tag-manual{display:inline-block;font-family:var(--sans);font-size:11px;font-weight:600;color:var(--charcoal);background:var(--sage);border-radius:4px;padding:0 5px;margin-left:6px;}
+
+  /* ---------- Saved records ---------- */
+  .rec-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+  .rec-head .count{font-size:13px;color:var(--muted);}
+  .rec-tools{display:flex;gap:8px;}
+  .mini-btn{background:#fff;border:1px solid var(--line);color:var(--charcoal);padding:7px 12px;border-radius:6px;font-size:13px;cursor:pointer;}
+  .mini-btn:hover:not(:disabled){border-color:var(--charcoal);}
+  .mini-btn.danger{color:var(--plum-deep);}
+  .mini-btn.danger:hover:not(:disabled){border-color:var(--plum);background:var(--plum-soft);}
+  .mini-btn:disabled{opacity:0.45;cursor:not-allowed;}
+  .storage-note{display:none;background:var(--plum-soft);border-left:3px solid var(--plum);border-radius:4px;padding:10px 14px;font-size:13px;color:#4F353B;margin-bottom:12px;}
+  .empty{font-size:13.5px;color:var(--muted);margin:4px 0 0;}
+  details.rec{border:1px solid #C3D1CA;border-radius:8px;margin-bottom:8px;background:#fff;}
+  details.rec summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;color:var(--charcoal);font-size:14px;font-weight:400;}
+  details.rec summary::-webkit-details-marker{display:none;}
+  details.rec[open] summary{border-bottom:1px solid var(--line);}
+  .rec-main b{display:block;font-weight:600;}
+  .rec-main small, .rec-time small{display:block;font-size:12px;color:var(--muted);}
+  .rec-time{text-align:right;font-family:var(--mono-num);font-weight:600;white-space:nowrap;}
+  .rec-body{padding:12px 14px 14px;font-size:13.5px;}
+  .rec-body table{width:100%;border-collapse:collapse;margin-bottom:10px;}
+  .rec-body td{padding:3px 0;vertical-align:top;}
+  .rec-body td:first-child{color:var(--muted);width:42%;}
+  .rec-body .formula{background:var(--lavender-soft);border-radius:6px;padding:8px 10px;font-family:var(--mono-num);font-size:13px;margin:4px 0 10px;overflow-wrap:anywhere;}
+  .rec-body h3{font-size:12.5px;margin:12px 0 6px;color:var(--plum);font-weight:600;}
+  .rec-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+
+  /* ---------- Chart, details, footer ---------- */
+  .decay-chart{width:100%;height:130px;}
+  .decay-chart .axis-label{font-size:9px;fill:var(--muted);}
+  footer{font-size:12.5px;color:#C9C6D6;text-align:center;margin-top:26px;line-height:1.6;background:var(--charcoal);border-radius:12px;padding:18px 20px;}
+  details.how summary{cursor:pointer;color:var(--charcoal);font-size:13.5px;font-weight:600;}
+  details.how{margin-bottom:6px;background:var(--lav-tint);border:1px solid #D2CEDD;border-radius:12px;padding:14px 18px;}
+
+  @media (max-width:640px){
+    body{padding:16px 12px 48px;}
+    .row3{grid-template-columns:1fr;}
+    .hero-inner{grid-template-columns:1fr;padding:22px 18px 18px;}
+    .hero-art{max-width:220px;justify-self:center;margin-top:10px;}
+    h1{font-size:34px;}
+    .hero-title{font-size:20px;}
+    .hero-tags{font-size:12px;}
+    .card{padding:18px 16px 20px;}
+    .card h2{margin:-18px -16px 16px;padding:12px 16px;}
+    .result .time{font-size:38px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="strip" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="hero-inner">
+      <div>
+        <h1>COBALT-60</h1>
+        <p class="hero-title">Precision Treatment Calculations</p>
+        <p class="hero-tags">Research · Dosimetry · Validation</p>
+        <p class="hero-tags accent">SSD &amp; SAD techniques</p>
+        <p class="sub">Computes manual treatment time for both SSD and SAD set-ups, using the department's own tissue-dose tables and decay-corrected output. Every step shown, so it can be checked by hand.</p>
+      </div>
+      <svg class="hero-art" viewBox="0 0 320 270" role="img" aria-label="Illustration of a Cobalt-60 teletherapy unit treating a patient on a couch" xmlns="http://www.w3.org/2000/svg">
+        <defs><clipPath id="roundel"><circle cx="160" cy="135" r="122"/></clipPath></defs>
+        <circle cx="160" cy="135" r="122" fill="#B7B2C9"/>
+        <g clip-path="url(#roundel)">
+        <circle cx="160" cy="135" r="100" fill="none" stroke="#F1EFF3" stroke-width="1.5" stroke-dasharray="3 7" opacity="0.8"/>
+        <!-- beam -->
+        <polygon points="112,150 152,150 188,186 76,186" fill="#F1EFF3" opacity="0.55"/>
+        <line x1="112" y1="150" x2="76" y2="186" stroke="#F1EFF3" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <line x1="152" y1="150" x2="188" y2="186" stroke="#F1EFF3" stroke-width="1.5" stroke-dasharray="4 4"/>
+        <!-- stand + arm -->
+        <rect x="183" y="70" width="30" height="156" rx="9" fill="#252D35"/>
+        <rect x="168" y="222" width="60" height="12" rx="6" fill="#252D35"/>
+        <rect x="116" y="58" width="104" height="30" rx="15" fill="#3A4550"/>
+        <circle cx="200" cy="73" r="6" fill="#A7B7B0"/>
+        <!-- source head -->
+        <rect x="92" y="62" width="80" height="70" rx="16" fill="#8B6269"/>
+        <path d="M108 132 H156 L148 152 H116 Z" fill="#252D35"/>
+        <g fill="#F1EFF3">
+          <path d="M132 98 L124 84.1 A16 16 0 0 1 140 84.1 Z"/>
+          <path d="M132 98 L148 98 A16 16 0 0 1 140 111.9 Z"/>
+          <path d="M132 98 L124 111.9 A16 16 0 0 1 116 98 Z"/>
+          <circle cx="132" cy="98" r="3.2"/>
+        </g>
+        <!-- couch + patient -->
+        <rect x="58" y="186" width="150" height="14" rx="7" fill="#F1EFF3"/>
+        <rect x="82" y="174" width="102" height="12" rx="6" fill="#A7B7B0"/>
+        <rect x="118" y="200" width="30" height="36" rx="4" fill="#A7B7B0"/>
+        <rect x="92" y="236" width="82" height="12" rx="6" fill="#8B6269"/>
+        </g>
+      </svg>
+    </div>
+  </header>
+
+  <div class="note">
+    This is a calculation aid built from published dosimetry tables, for training, cross-checking and department QA use. It does not replace treatment planning system output or sign-off by a qualified medical physicist. Patient details are optional. If you press Save, the record is kept only in this browser on this device &mdash; nothing is uploaded.
+  </div>
+
+  <div class="card">
+    <h2>1. Patient information <span class="opt">(optional)</span></h2>
+    <div class="row">
+      <div><label for="ptDate">Treatment date</label><input type="date" id="ptDate"></div>
+      <div><label for="ptRtNo">RT No.</label><input type="text" id="ptRtNo" placeholder="e.g. 2026C0012" autocomplete="off"></div>
+    </div>
+    <div class="full"><label for="ptName">Patient name</label><input type="text" id="ptName" autocomplete="off"></div>
+    <div class="full" style="margin-bottom:0;"><label for="ptDiagnosis">Diagnosis</label><input type="text" id="ptDiagnosis" list="dxList" placeholder="e.g. Ca Cervix" autocomplete="off">
+      <datalist id="dxList"><option value="Ca Cervix"><option value="Ca Stomach"><option value="Bone Mets"></datalist>
+    </div>
+    <p class="hint" style="margin:12px 0 0;">The treatment date also sets the month and year used for the source dose rate in step 4.</p>
+  </div>
+
+  <div id="calcInputs">
+
+  <div class="card">
+    <h2>2. Technique</h2>
+    <div class="technique-toggle">
+      <button type="button" class="tech-btn active" id="btnSSD" onclick="setTechnique('SSD')">
+        SSD technique
+        <span class="sub-line">Fixed source-to-skin distance · uses %PDD</span>
+      </button>
+      <button type="button" class="tech-btn" id="btnSAD" onclick="setTechnique('SAD')">
+        SAD technique
+        <span class="sub-line">Fixed source-to-axis (isocentric) · uses TMR</span>
+      </button>
+    </div>
+    <p style="font-size:12.5px;color:var(--muted);margin:-8px 0 0;">Reference distance: <span id="refDistLabel">80 cm SSD</span> (department table)</p>
+  </div>
+
+  <div class="card">
+    <h2>3. Prescription → dose per field <span class="opt">(optional)</span></h2>
+    <p class="hint">
+      Helper only — it fills in each field's dose below, it never overrides the treatment-time math itself.
+      If fields aren't split evenly (e.g. a boost field, wedged fields), apply first and then hand-edit the
+      individual field(s) that differ.
+    </p>
+    <div class="row3">
+      <div>
+        <label for="totalDose">Total prescribed dose</label>
+        <div style="display:flex;gap:6px;">
+          <input type="number" id="totalDose" step="0.01" placeholder="e.g. 50">
+          <select id="doseUnit" style="max-width:90px;">
+            <option value="Gy">Gy</option>
+            <option value="cGy">cGy</option>
+          </select>
+        </div>
+      </div>
+      <div><label for="numFractions">Number of fractions</label><input type="number" id="numFractions" step="1" placeholder="e.g. 25"></div>
+      <div><label for="numFieldsShare">Fields sharing each fraction</label><input type="number" id="numFieldsShare" step="1" value="1"></div>
+    </div>
+    <p style="font-size:13px;color:var(--charcoal);font-family:var(--mono-num);margin:4px 0 12px;" id="prescriptionPreview">Dose per field: —</p>
+    <button class="add-field" id="applyPrescriptionBtn" type="button">Apply to all fields below</button>
+  </div>
+
+  <div class="card sage">
+    <h2>4. Source output reference</h2>
+    <div class="checkbox-row">
+      <input type="checkbox" id="useCustomRef">
+      <label for="useCustomRef">Use a different Co-60 unit (not the built-in AMCGH 2026 tables)</label>
+    </div>
+
+    <div id="builtinRef">
+      <div class="row">
+        <div>
+          <label for="month">Treatment month</label>
+          <select id="month">
+            <option value="0">January</option><option value="1">February</option>
+            <option value="2">March</option><option value="3">April</option>
+            <option value="4">May</option><option value="5">June</option>
+            <option value="6">July</option><option value="7">August</option>
+            <option value="8">September</option><option value="9">October</option>
+            <option value="10">November</option><option value="11">December</option>
+          </select>
+        </div>
+        <div>
+          <label for="year">Year</label>
+          <input type="number" id="year" value="2026" step="1">
+        </div>
+      </div>
+      <label style="margin-top:2px;">Dose rate used (10×10 cm, reference distance)</label>
+      <div id="ratePreview" style="font-family:var(--mono-num);font-size:15px;color:var(--charcoal);">—</div>
+      <div class="rate-note" id="rateNote"></div>
+    </div>
+
+    <div id="customRef" style="display:none;">
+      <div class="row3">
+        <div><label for="refRate">Reference dose rate (cGy/min, 10×10)</label><input type="number" id="refRate" step="0.01" placeholder="e.g. 72.10"></div>
+        <div><label for="refDate">Reference date</label><input type="date" id="refDate"></div>
+        <div><label for="calcDate">Date of this treatment</label><input type="date" id="calcDate"></div>
+      </div>
+      <label for="halfLife">Co-60 half-life (years)</label>
+      <input type="number" id="halfLife" value="5.2711" step="0.0001" style="max-width:160px;">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>5. Treatment fields</h2>
+    <div id="fieldsContainer"></div>
+    <button class="add-field" id="addFieldBtn" type="button">+ Add another field</button>
+  </div>
+
+  </div><!-- /calcInputs -->
+
+  <button class="calc-btn" id="calcBtn" type="button">Calculate treatment time</button>
+  <button class="ghost-btn" id="newCalcBtn" type="button">New calculation (clear patient and fields)</button>
+
+  <div class="error-box" id="errorBox" role="alert"></div>
+
+  <div class="result" id="resultBox">
+    <div class="stale-msg" id="staleMsg">Inputs changed since this result was calculated. Press “Calculate treatment time” again before saving.</div>
+    <div class="result-patient" id="resultPatient" style="display:none;"></div>
+    <div class="label">Total treatment time</div>
+    <div class="time" id="resultTime">—</div>
+    <div class="result-actions">
+      <button class="save-btn" id="saveBtn" type="button">Save record</button>
+      <button class="breakdown-toggle" id="breakdownToggle" type="button">Show calculation steps</button>
+      <span class="save-status" id="saveStatus" role="status"></span>
+    </div>
+    <div class="breakdown" id="breakdownBox"></div>
+  </div>
+
+  <div class="card sage" id="recordsCard">
+    <h2>Saved records</h2>
+    <div class="storage-note" id="storageNote">This browser isn't allowing saved records here, so records are kept only until you close or refresh this page. Use “Export CSV” to keep a copy.</div>
+    <div class="rec-head">
+      <span class="count"><span id="recordCount">0</span> saved</span>
+      <div class="rec-tools">
+        <button class="mini-btn" id="exportAllBtn" type="button">Export all (CSV)</button>
+        <button class="mini-btn danger" id="clearAllBtn" type="button">Delete all</button>
+      </div>
+    </div>
+    <div id="recordsList"></div>
+    <p class="hint" style="margin:12px 0 0;">Records live in this browser only. Clearing the browser's site data deletes them, so export a CSV regularly as a backup.</p>
+  </div>
+
+  <div class="card">
+    <h2>Source decay — 2026</h2>
+    <p style="font-size:13px;color:var(--muted);margin-top:-8px;">Monthly output at 10×10 cm, decaying at ~1.1%/month (Co-60 half-life 5.27 yrs). Chart follows whichever technique is selected above.</p>
+    <svg class="decay-chart" id="decayChart" viewBox="0 0 640 130"></svg>
+  </div>
+
+  <details class="how">
+    <summary>How this is calculated</summary>
+    <p style="font-size:13.5px;color:var(--muted);">
+      <b>SSD technique:</b> Time (min) = (Dose × 100) ÷ (Dose rate × Output factor × %PDD). Dose is prescribed at a given depth below the skin surface, with the source fixed at a set skin distance.<br><br>
+      <b>SAD technique:</b> Time (min) = Dose ÷ (Dose rate × Output factor × TMR). Dose is prescribed at the isocentre (a fixed depth from the source, independent of skin distance), so the calculation uses tissue-maximum ratio (a plain 0–1 ratio, not a percentage) instead of percentage depth dose.<br><br>
+      In both cases, a rectangular field is first converted to its equivalent square (bilinear-interpolated from the department's rectangular-field table), and the output factor and PDD/TMR are read from the relevant tissue table at the given depth. Dose rate is decay-corrected to the treatment date.<br><br>
+      <b>Values outside the tables:</b> if a field size or depth falls outside the department tables, the calculator stops and says which value is missing instead of guessing. Tick “Enter values manually” on that field to supply the equivalent square, output factor and/or %PDD (TMR). Anything left blank is still read from the tables, and manual values are marked in the results and in saved records.
+    </p>
+  </details>
+
+  <footer>
+    Built as an open verification tool — patient details are optional and are kept only if you press Save, only in this browser.<br>
+    Always confirm results against your department's protocol before clinical use.
+  </footer>
+</div>
+
+<script>
+// ---------- SHARED: Equivalent squares of rectangular fields ----------
+const SHORT_AXES = [0.5,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+const RAW_EQSQ = [
+  [0.5, [0.5]],[1,[0.7,1]],[2,[0.9,1.4,2]],[3,[1,1.6,2.4,3]],[4,[1.1,1.7,2.7,3.4,4]],
+  [5,[1.1,1.8,2.9,3.8,4.5,5]],[6,[1.2,1.9,3.1,4.1,4.8,5.5,6]],[7,[1.2,2,3.3,4.3,5.1,5.8,6.5,7]],
+  [8,[1.2,2.1,3.4,4.5,5.4,6.2,6.9,7.5,8]],[9,[1.2,2.1,3.5,4.6,5.6,6.5,7.2,7.9,8.5,9]],
+  [10,[1.3,2.2,3.6,4.8,5.8,6.7,7.5,8.2,8.9,9.5,10]],
+  [11,[1.3,2.2,3.7,4.9,6,6.9,7.8,8.5,9.3,9.9,10.5,11]],
+  [12,[1.3,2.2,3.7,5,6.1,7.1,8,8.8,9.6,10.3,10.9,11.5,12]],
+  [13,[1.3,2.2,3.8,5.1,6.2,7.2,8.2,9.1,9.9,10.6,11.3,11.9,12.5,13]],
+  [14,[1.3,2.3,3.8,5.1,6.3,7.4,8.4,9.3,10.1,10.9,11.6,12.3,12.9,13.5,14]],
+  [15,[1.3,2.3,3.9,5.2,6.4,7.5,8.5,9.5,10.3,11.2,11.9,12.6,13.3,13.9,14.5,15]],
+  [16,[1.3,2.3,3.9,5.3,6.5,7.6,8.6,9.6,10.5,11.4,12.2,12.9,13.7,14.3,14.9,15.5,16]],
+  [17,[1.3,2.3,3.9,5.3,6.5,7.7,8.8,9.8,10.7,11.6,12.4,13.2,14,14.7,15.3,15.9,16.5,17]],
+  [18,[1.3,2.3,3.9,5.3,6.6,7.8,8.9,9.9,10.9,11.8,12.6,13.5,14.3,15,15.7,16.3,16.9,17.5,18]],
+  [19,[1.4,2.3,4,5.4,6.6,7.8,9,10,11,11.9,12.8,13.7,14.5,15.3,16,16.7,17.3,17.9,18.5,19]],
+  [20,[1.4,2.3,4,5.4,6.7,7.9,9,10.1,11.1,12.1,13,13.9,14.7,15.5,16.3,17,17.7,18.3,18.9,19.5,20]],
+  [22,[1.4,2.4,4,5.5,6.8,8,9.1,10.2,11.3,12.3,13.3,14.2,15.1,16,16.8,17.6,18.3,19,19.7,20.3,20.9]],
+  [24,[1.4,2.4,4,5.5,6.8,8.1,9.2,10.4,11.4,12.5,13.5,14.5,15.4,16.3,17.2,18,18.8,19.6,20.3,21,21.7]],
+  [26,[1.4,2.4,4.1,5.5,6.9,8.1,9.3,10.5,11.6,12.6,13.7,14.7,15.7,16.6,17.5,18.4,19.3,20.1,20.9,21.6,22.4]],
+  [28,[1.4,2.4,4.1,5.5,6.9,8.2,9.4,10.5,11.7,12.7,13.8,14.8,15.8,16.8,17.8,18.7,19.6,20.5,21.3,22.1,22.9]],
+  [30,[1.4,2.4,4.1,5.6,6.9,8.2,9.4,10.6,11.7,12.8,13.9,15,16,17,18,18.9,19.9,20.8,21.6,22.5,23.3]],
+  [32,[1.4,2.4,4.1,5.6,6.9,8.2,9.4,10.6,11.8,12.9,14,15,16.1,17.1,18.1,19.1,20.1,21,21.9,22.8,23.7]],
+  [34,[1.4,2.4,4.1,5.6,6.9,8.2,9.5,10.7,11.8,12.9,14,15.1,16.2,17.2,18.2,19.2,20.2,21.2,22.1,23.1,24]],
+  [36,[1.4,2.4,4.1,5.6,7,8.2,9.5,10.7,11.8,13,14.1,15.2,16.2,17.3,18.3,19.3,20.4,21.3,22.3,23.3,24.2]],
+  [38,[1.4,2.4,4.1,5.6,7,8.3,9.5,10.7,11.9,13,14.1,15.2,16.3,17.4,18.4,19.4,20.5,21.5,22.4,23.4,24.4]],
+  [40,[1.4,2.4,4.1,5.6,7,8.3,9.5,10.7,11.9,13,14.1,15.2,16.3,17.4,18.5,19.5,20.5,21.5,22.6,23.5,24.5]],
+  [45,[1.4,2.4,4.1,5.6,7,8.3,9.5,10.7,11.9,13.1,14.2,15.3,16.4,17.5,18.5,19.6,20.7,21.7,22.7,23.7,24.8]],
+  [50,[1.4,2.4,4.1,5.6,7,8.3,9.5,10.7,11.9,13.1,14.2,15.3,16.4,17.5,18.6,19.7,20.7,21.8,22.8,23.8,24.9]],
+  [55,[1.4,2.4,4.1,5.6,7,8.3,9.5,10.8,11.9,13.1,14.2,15.3,16.4,17.5,18.6,19.7,20.8,21.8,22.9,23.9,24.9]],
+  [60,[1.4,2.4,4.1,5.6,7,8.3,9.5,10.8,11.9,13.1,14.2,15.4,16.5,17.6,18.6,19.7,20.8,21.8,22.9,23.9,25]],
+  [9999,[1.4,2.4,4.1,5.6,7,8.3,9.5,10.8,11.9,13.1,14.2,15.4,16.5,17.6,18.6,19.7,20.8,21.9,22.9,24,25]]
+];
+const LONG_AXES = RAW_EQSQ.map(r => r[0]);
+const EQSQ = RAW_EQSQ.map(r => {
+  const v = r[1].slice();
+  while (v.length < SHORT_AXES.length) v.push(v[v.length-1]);
+  return v;
+});
+
+// ---------- SSD technique tables (80 cm SSD) ----------
+const SSD_OF_FIELDS = [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24];
+const SSD_OF_VALUES = [0.933,0.951,0.967,0.974,0.981,0.987,1,1.007,1.014,1.021,1.028,1.036,1.04,1.045,1.049,1.054,1.059,1.063,1.063,1.072,1.077];
+const PDD_FIELDS = [4,5,6,7,8,9,10,12,15,20,25,30];
+const PDD_DEPTHS = Array.from({length:30}, (_,i)=>i+1);
+const PDD = [
+[97.2,97.5,97.7,97.8,97.9,98.0,98.1,98.2,98.3,98.3,98.4,98.5],
+[91.4,92.1,92.6,93.0,93.2,93.4,93.7,93.9,94.1,94.3,94.5,94.7],
+[85.4,86.3,87.0,87.6,88.0,88.4,88.7,89.1,89.5,90.1,90.3,90.6],
+[79.7,80.7,81.6,82.3,82.8,83.2,83.7,84.3,84.9,85.6,86.0,86.3],
+[73.9,75.2,76.2,77.1,77.8,78.3,78.8,79.5,80.3,81.3,81.7,82.1],
+[68.4,69.7,70.8,71.9,72.6,73.3,73.9,74.9,75.9,76.9,77.5,78.1],
+[63.3,64.7,66.0,67.0,67.9,68.6,69.3,70.3,71.5,72.6,73.3,73.9],
+[58.5,59.9,61.2,62.3,63.2,64.0,64.7,65.8,67.1,68.6,69.5,70.1],
+[53.9,55.5,56.8,57.9,58.8,59.7,60.5,61.7,63.0,64.6,65.6,66.3],
+[49.7,51.2,52.5,53.8,54.8,55.7,56.4,57.7,59.2,60.8,61.9,62.6],
+[45.9,47.4,48.7,49.8,50.7,51.6,52.5,53.8,55.3,57.2,58.3,59.1],
+[42.4,43.8,45.0,46.2,47.2,48.1,48.9,50.3,51.9,53.7,55.0,55.8],
+[39.1,40.4,41.6,42.8,43.8,44.7,45.6,47.0,48.6,50.5,51.8,52.8],
+[36.1,37.3,38.7,39.7,40.7,41.6,42.4,43.7,45.4,47.4,48.7,49.8],
+[33.2,34.5,35.7,36.7,37.6,38.5,39.4,40.8,42.5,44.5,45.9,46.9],
+[30.8,31.9,33.0,34.0,35.0,35.9,36.8,38.1,39.7,41.8,43.2,44.2],
+[28.3,29.5,30.5,31.5,32.5,33.3,34.1,35.5,37.1,39.2,40.5,41.6],
+[26.2,27.3,28.3,29.3,30.2,30.9,31.7,33.1,34.7,36.7,38.1,39.2],
+[24.1,25.1,26.1,27.1,28.0,28.8,29.5,30.8,32.4,34.4,35.8,36.9],
+[22.2,23.2,24.1,25.0,25.8,26.6,27.4,28.7,30.2,32.2,33.5,34.7],
+[20.6,21.55,22.4,23.25,24.05,24.8,25.55,26.85,28.35,30.30,31.65,32.75],
+[19.0,19.9,20.7,21.5,22.3,23.0,23.7,25.0,26.5,28.4,29.8,30.8],
+[17.6,18.50,19.2,20.00,20.80,21.40,22.1,23.30,24.80,26.60,28.00,29.10],
+[16.2,17.0,17.7,18.5,19.2,19.9,20.5,21.7,23.1,24.9,26.2,27.3],
+[15.0,15.7,16.4,17.2,17.9,18.55,19.1,20.3,21.6,23.4,24.7,25.7],
+[13.8,14.5,15.2,15.9,16.6,17.2,17.8,18.9,20.2,21.9,23.2,24.2],
+[12.8,13.5,14.1,14.8,15.5,16.1,16.6,17.6,18.1,20.6,21.9,22.8],
+[11.8,12.5,13.1,13.8,14.4,14.9,15.4,16.4,17.7,19.3,20.6,21.5],
+[10.1,11.6,12.1,12.8,13.3,13.8,14.3,15.3,16.5,18.1,19.4,20.2],
+[10.1,10.7,11.2,11.8,12.3,12.8,13.3,14.2,15.4,17.0,18.2,19.0]
+];
+const SSD_DOSE_RATE_2026 = [72.10,71.32,70.54,69.77,69.01,68.26,67.52,66.79,66.06,65.34,64.63,63.93];
+
+// ---------- SAD technique tables (75 cm SAD) ----------
+const SAD_OF_FIELDS = [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+const SAD_OF_VALUES = [0.935,0.954,0.966,0.972,0.98,0.99,1,1.007,1.014,1.021,1.028,1.035,1.039,1.043,1.047,1.051,1.056];
+// TMR: field sizes 0,4,5,6,7,8,10,12,15,20,25 (cm); depths as listed
+const TMR_FIELDS = [0,4,5,6,7,8,10,12,15,20,25];
+const TMR_DEPTHS = [0.5,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10,11,12,13,14,15,16,17,18,19,20,22,24,26,28,30];
+const TMR = [
+[1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000,1.000],
+[0.966,0.980,0.982,0.986,0.988,0.990,0.994,0.995,0.996,0.996,0.996],
+[0.904,0.939,0.946,0.952,0.957,0.961,0.967,0.970,0.973,0.975,0.977],
+[0.845,0.898,0.908,0.917,0.924,0.929,0.937,0.942,0.947,0.951,0.955],
+[0.792,0.857,0.870,0.880,0.888,0.895,0.905,0.911,0.919,0.925,0.931],
+[0.741,0.815,0.829,0.841,0.851,0.858,0.870,0.879,0.889,0.898,0.907],
+[0.694,0.771,0.788,0.801,0.811,0.820,0.834,0.843,0.855,0.867,0.879],
+[0.649,0.728,0.745,0.759,0.771,0.781,0.796,0.808,0.820,0.835,0.850],
+[0.608,0.685,0.702,0.717,0.730,0.741,0.757,0.770,0.786,0.804,0.826],
+[0.570,0.645,0.663,0.677,0.690,0.701,0.719,0.733,0.750,0.772,0.794],
+[0.534,0.607,0.624,0.638,0.651,0.662,0.682,0.690,0.717,0.740,0.763],
+[0.501,0.571,0.588,0.602,0.615,0.627,0.646,0.663,0.683,0.709,0.728],
+[0.469,0.537,0.553,0.567,0.581,0.592,0.613,0.630,0.651,0.679,0.707],
+[0.439,0.504,0.520,0.534,0.547,0.559,0.581,0.598,0.620,0.649,0.678],
+[0.412,0.474,0.489,0.502,0.516,0.530,0.551,0.569,0.592,0.621,0.650],
+[0.386,0.446,0.461,0.476,0.487,0.499,0.521,0.540,0.563,0.594,0.625],
+[0.361,0.420,0.434,0.447,0.460,0.471,0.493,0.512,0.536,0.567,0.598],
+[0.338,0.395,0.409,0.422,0.434,0.445,0.467,0.485,0.510,0.541,0.572],
+[0.317,0.372,0.386,0.399,0.410,0.421,0.442,0.460,0.485,0.517,0.549],
+[0.296,0.350,0.363,0.375,0.387,0.397,0.418,0.436,0.461,0.494,0.527],
+[0.278,0.328,0.340,0.352,0.363,0.374,0.395,0.413,0.437,0.472,0.507],
+[0.246,0.290,0.302,0.313,0.323,0.333,0.351,0.371,0.395,0.428,0.461],
+[0.215,0.256,0.266,0.276,0.286,0.296,0.313,0.331,0.356,0.388,0.420],
+[0.187,0.225,0.234,0.243,0.252,0.261,0.279,0.296,0.310,0.352,0.391],
+[0.164,0.198,0.207,0.215,0.222,0.230,0.247,0.264,0.286,0.319,0.352],
+[0.144,0.175,0.182,0.190,0.198,0.204,0.220,0.236,0.257,0.287,0.317]
+];
+const SAD_DOSE_RATE_2026 = [72.80,72.01,71.23,70.45,69.69,68.93,68.18,67.44,66.70,65.98,65.26,64.55];
+const MONTHLY_DECAY = 1.011;
+
+// ---------- INTERPOLATION HELPERS ----------
+function interp1D(x, xs, ys){
+  if (x <= xs[0]) return ys[0];
+  if (x >= xs[xs.length-1]) return ys[ys.length-1];
+  for (let i=0;i<xs.length-1;i++){
+    if (x >= xs[i] && x <= xs[i+1]){
+      const t = (x - xs[i]) / (xs[i+1]-xs[i]);
+      return ys[i] + t*(ys[i+1]-ys[i]);
+    }
+  }
+  return ys[ys.length-1];
+}
+function bracket(x, arr){
+  if (x <= arr[0]) return [0,0];
+  if (x >= arr[arr.length-1]) return [arr.length-1, arr.length-1];
+  for (let i=0;i<arr.length-1;i++){ if (x >= arr[i] && x <= arr[i+1]) return [i,i+1]; }
+  return [arr.length-1, arr.length-1];
+}
+function getEquivalentSquare(a,b){
+  let short = Math.min(a,b), long = Math.max(a,b);
+  if (Math.abs(short-long) < 1e-6) return short;
+  short = Math.min(Math.max(short,0.5),20);
+  long = Math.min(long, 9999);
+  let [rl, rh] = bracket(long, LONG_AXES);
+  let [cl, ch] = bracket(short, SHORT_AXES);
+  rl = Math.max(rl, cl); rh = Math.max(rh, ch);
+  const q11 = EQSQ[rl][cl], q12 = EQSQ[rl][ch], q21 = EQSQ[rh][cl], q22 = EQSQ[rh][ch];
+  const longT = (LONG_AXES[rh]===LONG_AXES[rl]) ? 0 : (long-LONG_AXES[rl])/(LONG_AXES[rh]-LONG_AXES[rl]);
+  const shortT = (SHORT_AXES[ch]===SHORT_AXES[cl]) ? 0 : (short-SHORT_AXES[cl])/(SHORT_AXES[ch]-SHORT_AXES[cl]);
+  const top = q11 + shortT*(q12-q11);
+  const bot = q21 + shortT*(q22-q21);
+  return top + longT*(bot-top);
+}
+function get2D(depth, fs, FIELDS, DEPTHS, TABLE){
+  const [fl, fh] = bracket(fs, FIELDS);
+  const [dl, dh] = bracket(depth, DEPTHS);
+  const q11 = TABLE[dl][fl], q12 = TABLE[dl][fh], q21 = TABLE[dh][fl], q22 = TABLE[dh][fh];
+  const fT = (FIELDS[fh]===FIELDS[fl]) ? 0 : (fs-FIELDS[fl])/(FIELDS[fh]-FIELDS[fl]);
+  const dT = (DEPTHS[dh]===DEPTHS[dl]) ? 0 : (depth-DEPTHS[dl])/(DEPTHS[dh]-DEPTHS[dl]);
+  const top = q11 + fT*(q12-q11);
+  const bot = q21 + fT*(q22-q21);
+  return top + dT*(bot-top);
+}
+
+
+// =====================================================================
+//  UI LAYER (patient info, manual override, validation, saved records)
+//  The tables and the treatment-time formula above/below are unchanged.
+// =====================================================================
+const $ = id => document.getElementById(id);
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function fmtDate(iso){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+  return m ? `${m[3]}.${m[2]}.${m[1]}` : '—';
+}
+function todayISO(){
+  const d = new Date(), p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+}
+function trimmed(id){ return $(id).value.trim(); }
+
+// ---------- TECHNIQUE ----------
+let TECHNIQUE = 'SSD';
+function dfLabelText(){ return TECHNIQUE === 'SSD' ? '%PDD (0–100)' : 'TMR (0–1)'; }
+function setTechnique(t){
+  TECHNIQUE = t;
+  $('btnSSD').classList.toggle('active', t==='SSD');
+  $('btnSAD').classList.toggle('active', t==='SAD');
+  $('refDistLabel').textContent = t==='SSD' ? '80 cm SSD' : '75 cm SAD';
+  document.querySelectorAll('.lblDF').forEach(l => { l.textContent = dfLabelText(); });
+  updateRatePreview();
+  drawChart();
+  refreshAllFieldWarnings();
+  markStale();
+}
+
+function getOutputFactor(fs){
+  return TECHNIQUE==='SSD' ? interp1D(fs, SSD_OF_FIELDS, SSD_OF_VALUES) : interp1D(fs, SAD_OF_FIELDS, SAD_OF_VALUES);
+}
+function getDepthFactor(depth, fs){
+  return TECHNIQUE==='SSD' ? get2D(depth, fs, PDD_FIELDS, PDD_DEPTHS, PDD) : get2D(depth, fs, TMR_FIELDS, TMR_DEPTHS, TMR);
+}
+function getBuiltinDoseRate(monthIdx, year){
+  const table = TECHNIQUE==='SSD' ? SSD_DOSE_RATE_2026 : SAD_DOSE_RATE_2026;
+  if (year === 2026) return table[monthIdx];
+  const monthsFrom2026Jan = (year-2026)*12 + monthIdx;
+  return table[0] / Math.pow(MONTHLY_DECAY, monthsFrom2026Jan);
+}
+function getCustomDoseRate(refRate, refDate, calcDate, halfLifeYears){
+  const msPerDay = 86400000;
+  const days = (calcDate - refDate) / msPerDay;
+  const years = days / 365.25;
+  return refRate * Math.pow(0.5, years/halfLifeYears);
+}
+
+// ---------- TABLE RANGES + FIELD RESOLUTION ----------
+function tableRanges(){
+  if (TECHNIQUE === 'SSD') return {
+    of: [SSD_OF_FIELDS[0], SSD_OF_FIELDS[SSD_OF_FIELDS.length-1]],
+    dfField: [PDD_FIELDS[0], PDD_FIELDS[PDD_FIELDS.length-1]],
+    dfDepth: [PDD_DEPTHS[0], PDD_DEPTHS[PDD_DEPTHS.length-1]],
+    dfName: '%PDD'
+  };
+  return {
+    of: [SAD_OF_FIELDS[0], SAD_OF_FIELDS[SAD_OF_FIELDS.length-1]],
+    dfField: [TMR_FIELDS[0], TMR_FIELDS[TMR_FIELDS.length-1]],
+    dfDepth: [TMR_DEPTHS[0], TMR_DEPTHS[TMR_DEPTHS.length-1]],
+    dfName: 'TMR'
+  };
+}
+function outside(v, r){ return v < r[0] - 1e-9 || v > r[1] + 1e-9; }
+function r2(v){ return Math.round(v*100)/100; }
+
+// Reads one field block and works out the three lookup values (equivalent square,
+// output factor, %PDD/TMR). A value comes from the manual box when one was typed,
+// otherwise from the department tables. If a table cannot supply it, an error is
+// recorded instead of silently clamping to the nearest table edge.
+function resolveField(b){
+  const num = sel => parseFloat(b.querySelector(sel).value);
+  const len = num('.fLen'), wid = num('.fWid'), depth = num('.fDepth'), dose = num('.fDose');
+  const r = {len, wid, depth, dose, complete:true, errors:[], eqsq:null, of:null, df:null,
+             manualEq:false, manualOF:false, manualDF:false};
+  const pos = v => !isNaN(v) && v > 0;
+  if (!pos(len) || !pos(wid) || !pos(depth) || !pos(dose)){
+    r.complete = false;
+    r.errors.push('Enter field length, width, depth and dose (each above 0), or remove this field.');
+    return r;
+  }
+  const manualOn = b.querySelector('.fManualChk').checked;
+  const mEq = manualOn ? num('.fManEq') : NaN;
+  const mOF = manualOn ? num('.fManOF') : NaN;
+  const mDF = manualOn ? num('.fManDF') : NaN;
+  const rng = tableRanges();
+  const dfMax = TECHNIQUE === 'SSD' ? 100 : 1;
+
+  if (!isNaN(mEq) && !(mEq > 0 && mEq <= 100)) r.errors.push('Manual equivalent square must be above 0 and at most 100 cm.');
+  if (!isNaN(mOF) && !(mOF > 0 && mOF <= 2)) r.errors.push('Manual output factor must be above 0 and at most 2.');
+  if (!isNaN(mDF) && !(mDF > 0 && mDF <= dfMax)) r.errors.push(`Manual ${rng.dfName} must be above 0 and at most ${dfMax}.`);
+  if (r.errors.length) return r;
+
+  const needTable = isNaN(mOF) || isNaN(mDF);
+  let eqsq = null;
+  if (!isNaN(mEq)){
+    eqsq = mEq; r.manualEq = true;
+  } else if (needTable){
+    const sh = Math.min(len, wid), lg = Math.max(len, wid);
+    const isSquare = Math.abs(sh - lg) < 1e-6;
+    if (!isSquare && (sh < 0.5 || sh > 20)){
+      r.errors.push(`Rectangular field ${len}×${wid} cm is outside the equivalent-square table (the shorter side must be 0.5–20 cm).`);
+    } else {
+      eqsq = getEquivalentSquare(len, wid);
+    }
+  }
+  r.eqsq = eqsq;
+
+  if (!isNaN(mOF)){
+    r.of = mOF; r.manualOF = true;
+  } else if (eqsq !== null){
+    if (outside(eqsq, rng.of)) r.errors.push(`Equivalent square ${r2(eqsq)} cm is outside the output-factor table (${rng.of[0]}–${rng.of[1]} cm).`);
+    else r.of = getOutputFactor(eqsq);
+  }
+
+  if (!isNaN(mDF)){
+    r.df = mDF; r.manualDF = true;
+  } else if (eqsq !== null){
+    let dfBad = false;
+    if (outside(eqsq, rng.dfField)){
+      dfBad = true;
+      r.errors.push(`Equivalent square ${r2(eqsq)} cm is outside the ${rng.dfName} table (${rng.dfField[0]}–${rng.dfField[1]} cm).`);
+    }
+    if (outside(depth, rng.dfDepth)){
+      dfBad = true;
+      r.errors.push(`Depth ${depth} cm is outside the ${rng.dfName} table (${rng.dfDepth[0]}–${rng.dfDepth[1]} cm).`);
+    }
+    if (!dfBad) r.df = getDepthFactor(depth, eqsq);
+  }
+  return r;
+}
+
+// ---------- FIELD BLOCKS ----------
+let fieldCount = 0;
+function addField(prefill){
+  fieldCount++;
+  const id = fieldCount;
+  const div = document.createElement('div');
+  div.className = 'field-block';
+  div.dataset.id = id;
+  div.innerHTML = `
+    <div class="field-title">Field ${id}</div>
+    ${id>1 ? '<button class="remove-field" type="button" onclick="removeField(this)">Remove</button>' : ''}
+    <div class="row3">
+      <div><label>Field length (cm)</label><input type="number" step="0.1" class="fLen" value="${prefill?prefill.len:''}"></div>
+      <div><label>Field width (cm)</label><input type="number" step="0.1" class="fWid" value="${prefill?prefill.wid:''}"></div>
+      <div><label>Depth (cm)</label><input type="number" step="0.1" class="fDepth" value="${prefill?prefill.depth:''}"></div>
+    </div>
+    <div class="row">
+      <div><label>Dose for this field (cGy)</label><input type="number" step="1" class="fDose" value="${prefill?prefill.dose:''}"></div>
+    </div>
+    <div class="range-warn"></div>
+    <div class="checkbox-row" style="margin-bottom:0;">
+      <input type="checkbox" class="fManualChk" id="man_${id}">
+      <label for="man_${id}">Enter values manually (for sizes or depths outside the department tables)</label>
+    </div>
+    <div class="manual-box">
+      <div class="row3">
+        <div><label>Equivalent square (cm)</label><input type="number" step="0.01" class="fManEq" placeholder="optional"></div>
+        <div><label>Output factor</label><input type="number" step="0.001" class="fManOF" placeholder="optional"></div>
+        <div><label class="lblDF">${dfLabelText()}</label><input type="number" step="0.01" class="fManDF" placeholder="optional"></div>
+      </div>
+      <p class="hint" style="margin:0;">Leave a box blank to read that value from the department table. Manual values are marked in the results and in saved records.</p>
+    </div>
+  `;
+  $('fieldsContainer').appendChild(div);
+  renumberFields();
+}
+function renumberFields(){
+  document.querySelectorAll('.field-block').forEach((b, i) => {
+    b.querySelector('.field-title').textContent = 'Field ' + (i + 1);
+  });
+}
+function removeField(btn){
+  btn.closest('.field-block').remove();
+  renumberFields();
+  markStale();
+}
+function refreshFieldWarning(b){
+  const w = b.querySelector('.range-warn');
+  const r = resolveField(b);
+  if (!r.complete || r.errors.length === 0){ w.style.display = 'none'; w.innerHTML = ''; return; }
+  const manualOn = b.querySelector('.fManualChk').checked;
+  w.innerHTML = '<b>Check this field</b><ul>' + r.errors.map(e => `<li>${esc(e)}</li>`).join('') + '</ul><p>' +
+    (manualOn ? 'Fill in the missing value(s) in the manual box below, or change the field.'
+              : 'Tick “Enter values manually” below and type the value(s) your department uses.') + '</p>';
+  w.style.display = 'block';
+}
+function refreshAllFieldWarnings(){
+  document.querySelectorAll('.field-block').forEach(refreshFieldWarning);
+}
+$('addFieldBtn').addEventListener('click', () => { addField(); markStale(); });
+
+// ---------- PRESCRIPTION → DOSE PER FIELD HELPER ----------
+function updatePrescriptionPreview(){
+  const total = parseFloat($('totalDose').value);
+  const unit = $('doseUnit').value;
+  const fractions = parseFloat($('numFractions').value);
+  const fieldsShare = parseFloat($('numFieldsShare').value);
+  const preview = $('prescriptionPreview');
+  if (isNaN(total) || isNaN(fractions) || fractions<=0 || isNaN(fieldsShare) || fieldsShare<=0){
+    preview.textContent = 'Dose per field: —';
+    return null;
+  }
+  const totalCGy = unit==='Gy' ? total*100 : total;
+  const perFraction = totalCGy / fractions;
+  const perField = perFraction / fieldsShare;
+  preview.textContent = `Dose per fraction: ${perFraction.toFixed(2)} cGy  →  Dose per field: ${perField.toFixed(2)} cGy`;
+  return perField;
+}
+['totalDose','doseUnit','numFractions','numFieldsShare'].forEach(id => {
+  $(id).addEventListener('input', updatePrescriptionPreview);
+  $(id).addEventListener('change', updatePrescriptionPreview);
+});
+$('applyPrescriptionBtn').addEventListener('click', () => {
+  const perField = updatePrescriptionPreview();
+  if (perField === null){
+    alert('Enter total dose and number of fractions first.');
+    return;
+  }
+  document.querySelectorAll('.fDose').forEach(input => { input.value = perField.toFixed(2); });
+  markStale();
+});
+
+// ---------- SOURCE OUTPUT REFERENCE ----------
+$('useCustomRef').addEventListener('change', (e) => {
+  $('builtinRef').style.display = e.target.checked ? 'none' : 'block';
+  $('customRef').style.display = e.target.checked ? 'block' : 'none';
+});
+
+function updateRatePreview(){
+  const m = parseInt($('month').value);
+  const y = parseInt($('year').value);
+  const note = $('rateNote');
+  if (isNaN(y)){ $('ratePreview').textContent = '—'; note.textContent = ''; return; }
+  const rate = getBuiltinDoseRate(m, y);
+  $('ratePreview').textContent = rate.toFixed(2) + ' cGy/min';
+  const msgs = [];
+  const iso = $('ptDate').value;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)){
+    const dy = +iso.slice(0,4), dm = +iso.slice(5,7) - 1;
+    if (dy !== y || dm !== m) msgs.push(`The treatment date is in ${MONTH_NAMES[dm]} ${dy}, but the rate shown is for ${MONTH_NAMES[m]} ${y}.`);
+  }
+  if (y !== 2026) msgs.push('Outside 2026 this rate is extrapolated from the January 2026 table at 1.1% per month.');
+  note.textContent = msgs.join(' ');
+}
+$('month').addEventListener('change', updateRatePreview);
+$('year').addEventListener('input', updateRatePreview);
+
+// The treatment date drives the month/year (and the custom-unit treatment date).
+function syncDateToRate(){
+  const iso = $('ptDate').value;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)){
+    $('month').value = String(+iso.slice(5,7) - 1);
+    $('year').value = String(+iso.slice(0,4));
+    $('calcDate').value = iso;
+  }
+  updateRatePreview();
+  markStale();
+}
+
+// ---------- PATIENT INFO ----------
+function readPatient(){
+  return { date: $('ptDate').value, name: trimmed('ptName'), diagnosis: trimmed('ptDiagnosis'), rtNo: trimmed('ptRtNo') };
+}
+function refreshResultPatient(){
+  const p = readPatient(), bits = [];
+  if (p.name) bits.push(esc(p.name));
+  if (p.rtNo) bits.push('RT No. ' + esc(p.rtNo));
+  if (p.diagnosis) bits.push(esc(p.diagnosis));
+  if (p.date) bits.push(fmtDate(p.date));
+  const el = $('resultPatient');
+  if (bits.length){ el.innerHTML = bits.join(' · '); el.style.display = 'block'; }
+  else { el.style.display = 'none'; el.innerHTML = ''; }
+}
+function onPatientChange(){
+  refreshResultPatient();
+  if (LAST_CALC){
+    LAST_CALC.saved = false;
+    $('saveBtn').disabled = false;
+    $('saveBtn').textContent = 'Save record';
+    $('saveStatus').textContent = '';
+    $('saveStatus').classList.remove('bad');
+  }
+}
+['ptRtNo','ptName','ptDiagnosis'].forEach(id => $(id).addEventListener('input', onPatientChange));
+$('ptDate').addEventListener('input', () => { syncDateToRate(); onPatientChange(); });
+$('ptDate').addEventListener('change', () => { syncDateToRate(); onPatientChange(); });
+
+// ---------- STALE-RESULT GUARD ----------
+// Any change to the calculation inputs invalidates the last result so a record
+// can never be saved with numbers that no longer match the form.
+let LAST_CALC = null;
+function markStale(){
+  if (!LAST_CALC) return;
+  LAST_CALC = null;
+  $('resultBox').classList.add('stale');
+  $('staleMsg').style.display = 'block';
+  $('saveBtn').disabled = true;
+  $('saveStatus').textContent = '';
+}
+function onCalcInput(e){
+  markStale();
+  const b = e.target.closest ? e.target.closest('.field-block') : null;
+  if (b){
+    if (e.target.classList.contains('fManualChk')){
+      b.querySelector('.manual-box').style.display = e.target.checked ? 'block' : 'none';
+    }
+    refreshFieldWarning(b);
+  }
+}
+$('calcInputs').addEventListener('input', onCalcInput);
+$('calcInputs').addEventListener('change', onCalcInput);
+
+// ---------- RESULT DISPLAY HELPERS ----------
+function hideResult(){
+  $('resultBox').classList.remove('show', 'stale');
+  $('staleMsg').style.display = 'none';
+  $('breakdownBox').classList.remove('show');
+  $('breakdownToggle').textContent = 'Show calculation steps';
+  $('saveStatus').textContent = '';
+  $('saveStatus').classList.remove('bad');
+}
+function showErrors(list){
+  const box = $('errorBox');
+  box.innerHTML = '<b>Check these before calculating</b><ul>' + list.map(e => `<li>${esc(e)}</li>`).join('') + '</ul>';
+  box.style.display = 'block';
+  box.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function formulaText(s, rate, tech){
+  const dec = tech === 'SSD' ? 2 : 3;
+  return `T${s.idx} = (${s.dose}${s.doseMultiplier>1 ? ' × ' + s.doseMultiplier : ''}) ÷ (${rate.toFixed(2)} × ${s.of.toFixed(3)} × ${s.df.toFixed(dec)}) = ${s.time.toFixed(2)} min`;
+}
+function splitTime(totalTime){
+  const totalSecs = Math.round(totalTime * 60);
+  return {mins: Math.floor(totalSecs / 60), secs: totalSecs % 60};
+}
+function manualList(s){
+  const bits = [];
+  if (s.manualEq) bits.push('equivalent square');
+  if (s.manualOF) bits.push('output factor');
+  if (s.manualDF) bits.push(s.depthLabel);
+  return bits;
+}
+
+// ---------- CALCULATE ----------
+$('calcBtn').addEventListener('click', () => {
+  $('errorBox').style.display = 'none';
+  const problems = [];
+
+  // 1) Dose rate
+  const useCustom = $('useCustomRef').checked;
+  let doseRate, rateLabel, rateSource;
+  if (useCustom){
+    const refRate = parseFloat($('refRate').value);
+    const refDateStr = $('refDate').value;
+    const calcDateStr = $('calcDate').value;
+    const hl = parseFloat($('halfLife').value);
+    if (!(refRate > 0)) problems.push('Source output: enter the reference dose rate (cGy/min).');
+    if (!refDateStr) problems.push('Source output: choose the reference date.');
+    if (!calcDateStr) problems.push('Source output: choose the date of this treatment.');
+    if (!(hl > 0)) problems.push('Source output: enter the Co-60 half-life in years.');
+    if (!problems.length){
+      doseRate = getCustomDoseRate(refRate, new Date(refDateStr), new Date(calcDateStr), hl);
+      rateLabel = `${doseRate.toFixed(3)} cGy/min (decay-corrected from ${refRate} cGy/min on ${refDateStr})`;
+      rateSource = 'custom';
+    }
+  } else {
+    const m = parseInt($('month').value);
+    const y = parseInt($('year').value);
+    if (isNaN(y) || y < 2000 || y > 2100){
+      problems.push('Source output: enter a valid year (2000–2100).');
+    } else {
+      doseRate = getBuiltinDoseRate(m, y);
+      const monthName = $('month').options[m].text;
+      rateLabel = `${doseRate.toFixed(3)} cGy/min (${monthName} ${y}, ${TECHNIQUE} table${y !== 2026 ? ', extrapolated from the 2026 table' : ''})`;
+      rateSource = 'builtin';
+    }
+  }
+  if (doseRate !== undefined && !(isFinite(doseRate) && doseRate > 0)){
+    problems.push('Source output: the dose rate could not be worked out. Check the source output inputs.');
+    doseRate = undefined;
+  }
+
+  // 2) Fields
+  const depthLabel = TECHNIQUE==='SSD' ? '%PDD' : 'TMR';
+  const blocks = Array.from(document.querySelectorAll('.field-block'));
+  const steps = [];
+  if (!blocks.length) problems.push('Add at least one treatment field.');
+  blocks.forEach((b, idx) => {
+    const r = resolveField(b);
+    if (r.errors.length){
+      r.errors.forEach(e => problems.push(`Field ${idx+1}: ${e}`));
+      return;
+    }
+    steps.push({idx: idx+1, len:r.len, wid:r.wid, depth:r.depth, dose:r.dose, eqsq:r.eqsq, of:r.of, df:r.df,
+                manualEq:r.manualEq, manualOF:r.manualOF, manualDF:r.manualDF, depthLabel});
+  });
+
+  if (problems.length){
+    LAST_CALC = null;
+    hideResult();
+    showErrors(problems);
+    return;
+  }
+
+  // 3) Treatment time (formula unchanged)
+  let totalTime = 0;
+  steps.forEach(s => {
+    // %PDD is on a 0-100 scale, so SSD needs dose*100 to cancel it.
+    // TMR is already a 0-1 ratio, so SAD must NOT multiply by 100 - doing so
+    // was the bug that made SAD times come out ~100x too large.
+    s.doseMultiplier = TECHNIQUE==='SSD' ? 100 : 1;
+    s.time = (s.dose * s.doseMultiplier) / (doseRate * s.of * s.df);
+    totalTime += s.time;
+  });
+
+  // 4) Show it
+  hideResult();
+  $('resultBox').classList.add('show');
+  const {mins, secs} = splitTime(totalTime);
+  $('resultTime').innerHTML = `${totalTime.toFixed(2)}<span>min (${mins} min ${secs} sec)</span>`;
+  refreshResultPatient();
+
+  let html = `<table><tr><td>Technique</td><td>${TECHNIQUE}</td></tr><tr><td>Dose rate used</td><td>${esc(rateLabel)}</td></tr></table>`;
+  steps.forEach(s => {
+    const manual = manualList(s);
+    const eqCell = s.eqsq === null ? 'not needed (manual values)'
+      : `${s.len}×${s.wid} → ${s.eqsq.toFixed(2)} cm` + (s.manualEq ? '<span class="tag-manual">manual</span>' : '');
+    html += `
+      <table>
+        <tr><td>Field ${s.idx} — equivalent square</td><td>${eqCell}</td></tr>
+        <tr><td>Output factor</td><td>${s.of.toFixed(3)}${s.manualOF ? '<span class="tag-manual">manual</span>' : ''}</td></tr>
+        <tr><td>${depthLabel} at ${s.depth} cm</td><td>${TECHNIQUE==='SSD' ? s.df.toFixed(2)+'%' : s.df.toFixed(3)}${s.manualDF ? '<span class="tag-manual">manual</span>' : ''}</td></tr>
+        <tr><td>Time for field ${s.idx}</td><td>${s.time.toFixed(2)} min</td></tr>
+      </table>
+      <div class="formula">${esc(formulaText(s, doseRate, TECHNIQUE))}</div>
+      <br>`;
+  });
+  $('breakdownBox').innerHTML = html;
+
+  // 5) Snapshot for saving
+  const totalDoseVal = parseFloat($('totalDose').value), fractionsVal = parseFloat($('numFractions').value), shareVal = parseFloat($('numFieldsShare').value);
+  LAST_CALC = {
+    technique: TECHNIQUE,
+    doseRate, rateLabel, rateSource,
+    totalTime,
+    rx: {
+      total: isNaN(totalDoseVal) ? null : totalDoseVal,
+      unit: $('doseUnit').value,
+      fractions: isNaN(fractionsVal) ? null : fractionsVal,
+      fieldsShare: isNaN(shareVal) ? null : shareVal
+    },
+    fields: steps.map(s => ({idx:s.idx, len:s.len, wid:s.wid, depth:s.depth, dose:s.dose, eqsq:s.eqsq, of:s.of, df:s.df,
+                             time:s.time, doseMultiplier:s.doseMultiplier, depthLabel:s.depthLabel,
+                             manualEq:s.manualEq, manualOF:s.manualOF, manualDF:s.manualDF})),
+    saved: false
+  };
+  $('saveBtn').disabled = false;
+  $('saveBtn').textContent = 'Save record';
+});
+
+$('breakdownToggle').addEventListener('click', (e) => {
+  const box = $('breakdownBox');
+  box.classList.toggle('show');
+  e.target.textContent = box.classList.contains('show') ? 'Hide calculation steps' : 'Show calculation steps';
+});
+
+// ---------- SAVED RECORDS (stored in this browser only) ----------
+const STORE_KEY = 'co60_ttc_records_v1';
+let STORAGE_OK = true;
+let RECORDS = [];
+
+function loadRecords(){
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return [];
+    try {
+      const arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) throw new Error('not a list');
+      return arr.filter(r => r && r.calc && typeof r.calc.totalTime === 'number' && Array.isArray(r.calc.fields));
+    } catch (parseErr){
+      // Never overwrite something we could not read: keep a backup copy first.
+      try { localStorage.setItem(STORE_KEY + '_unreadable_backup', raw); } catch (_) {}
+      return [];
+    }
+  } catch (e){
+    STORAGE_OK = false;
+    return [];
+  }
+}
+function persist(){
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(RECORDS));
+    STORAGE_OK = true;
+  } catch (e){
+    STORAGE_OK = false;
+  }
+  $('storageNote').style.display = STORAGE_OK ? 'none' : 'block';
+  return STORAGE_OK;
+}
+
+function recordHTML(rec){
+  const p = rec.patient || {}, c = rec.calc;
+  let body = `<table>
+      <tr><td>Patient</td><td>${esc(p.name || '—')}</td></tr>
+      <tr><td>RT No.</td><td>${esc(p.rtNo || '—')}</td></tr>
+      <tr><td>Diagnosis</td><td>${esc(p.diagnosis || '—')}</td></tr>
+      <tr><td>Treatment date</td><td>${fmtDate(p.date)}</td></tr>
+      <tr><td>Technique</td><td>${esc(c.technique)}</td></tr>`;
+  if (c.rx && (c.rx.total !== null || c.rx.fractions !== null)){
+    body += `<tr><td>Prescription</td><td>${c.rx.total !== null ? esc(c.rx.total) + ' ' + esc(c.rx.unit) : '—'}${c.rx.fractions !== null ? ' in ' + esc(c.rx.fractions) + ' fractions' : ''}${c.rx.fieldsShare !== null ? ', ' + esc(c.rx.fieldsShare) + ' field(s) per fraction' : ''}</td></tr>`;
+  }
+  body += `<tr><td>Dose rate used</td><td>${esc(c.rateLabel)}</td></tr>
+      <tr><td>Total time</td><td><b>${c.totalTime.toFixed(2)} min</b></td></tr></table>`;
+  c.fields.forEach(s => {
+    const manual = manualList(s);
+    body += `<h3>Field ${s.idx}: ${esc(s.len)}×${esc(s.wid)} cm, depth ${esc(s.depth)} cm, dose ${esc(s.dose)} cGy${manual.length ? ' (manual: ' + esc(manual.join(', ')) + ')' : ''}</h3>
+      <div class="formula">${esc(formulaText(s, c.doseRate, c.technique))}</div>`;
+  });
+  body += `<div class="rec-actions">
+      <button class="mini-btn" type="button" data-act="export" data-id="${esc(rec.id)}">Export CSV</button>
+      <button class="mini-btn danger" type="button" data-act="delete" data-id="${esc(rec.id)}">Delete</button>
+    </div>
+    <p class="hint" style="margin:10px 0 0;">Saved ${esc(new Date(rec.savedAt).toLocaleString())}</p>`;
+  return `<details class="rec"><summary>
+      <span class="rec-main"><b>${esc(p.name || 'Unnamed patient')}</b><small>${p.rtNo ? 'RT No. ' + esc(p.rtNo) : 'No RT No.'} · ${fmtDate(p.date)}</small></span>
+      <span class="rec-time">${c.totalTime.toFixed(2)} min<small>${esc(c.technique)}</small></span>
+    </summary><div class="rec-body">${body}</div></details>`;
+}
+function renderRecords(){
+  $('recordCount').textContent = RECORDS.length;
+  $('exportAllBtn').disabled = RECORDS.length === 0;
+  $('clearAllBtn').disabled = RECORDS.length === 0;
+  $('storageNote').style.display = STORAGE_OK ? 'none' : 'block';
+  $('recordsList').innerHTML = RECORDS.length
+    ? RECORDS.map(recordHTML).join('')
+    : '<p class="empty">No saved records yet. Calculate a treatment time, then press “Save record”.</p>';
+}
+
+$('saveBtn').addEventListener('click', () => {
+  if (!LAST_CALC || LAST_CALC.saved) return;
+  const patient = readPatient();
+  const status = $('saveStatus');
+  if (!patient.name && !patient.rtNo){
+    status.textContent = 'Enter the patient name or RT No. before saving.';
+    status.classList.add('bad');
+    $('ptName').scrollIntoView({behavior:'smooth', block:'center'});
+    $('ptName').focus();
+    return;
+  }
+  const calc = JSON.parse(JSON.stringify(LAST_CALC));
+  delete calc.saved;
+  RECORDS.unshift({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+    savedAt: new Date().toISOString(),
+    patient, calc
+  });
+  persist();
+  renderRecords();
+  LAST_CALC.saved = true;
+  $('saveBtn').disabled = true;
+  $('saveBtn').textContent = 'Saved';
+  status.classList.remove('bad');
+  status.textContent = STORAGE_OK ? `Saved. ${RECORDS.length} record(s) in this browser.` : 'Saved for this session only (see note under Saved records).';
+});
+
+$('recordsList').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-act]');
+  if (!btn) return;
+  const rec = RECORDS.find(r => r.id === btn.dataset.id);
+  if (!rec) return;
+  if (btn.dataset.act === 'delete'){
+    const label = (rec.patient && (rec.patient.name || rec.patient.rtNo)) || 'this record';
+    if (!confirm(`Delete the saved record for ${label}? This cannot be undone.`)) return;
+    RECORDS = RECORDS.filter(r => r.id !== rec.id);
+    persist();
+    renderRecords();
+  } else if (btn.dataset.act === 'export'){
+    downloadCSV([rec], `co60-record-${(rec.patient.rtNo || rec.patient.name || 'patient').replace(/[^\w\-]+/g,'_')}.csv`);
+  }
+});
+$('exportAllBtn').addEventListener('click', () => downloadCSV(RECORDS, `co60-records-${todayISO()}.csv`));
+$('clearAllBtn').addEventListener('click', () => {
+  if (!RECORDS.length) return;
+  if (!confirm(`Delete all ${RECORDS.length} saved records? This cannot be undone. Export a CSV first if you need a copy.`)) return;
+  RECORDS = [];
+  persist();
+  renderRecords();
+});
+
+// ---------- CSV EXPORT (one row per field) ----------
+function csvCell(v){
+  if (v === null || v === undefined) return '';
+  let s = String(v);
+  // Stop spreadsheet apps from running text as a formula.
+  if (typeof v === 'string' && /^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  if (/[",\n\r]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+function downloadCSV(recs, filename){
+  const head = ['Saved at','Treatment date','Patient name','RT No.','Diagnosis','Technique',
+                'Total prescribed dose','Dose unit','Fractions','Fields per fraction',
+                'Dose rate (cGy/min)','Dose rate source','Field no.','Length (cm)','Width (cm)','Depth (cm)',
+                'Dose for field (cGy)','Equivalent square (cm)','Output factor','%PDD or TMR',
+                'Manual values','Field time (min)','Total time (min)'];
+  const lines = [head.map(csvCell).join(',')];
+  recs.forEach(rec => {
+    const p = rec.patient || {}, c = rec.calc, rx = c.rx || {};
+    c.fields.forEach(s => {
+      const manual = manualList(s).join(' + ');
+      lines.push([
+        rec.savedAt, p.date || '', p.name || '', p.rtNo || '', p.diagnosis || '', c.technique,
+        rx.total, rx.unit, rx.fractions, rx.fieldsShare,
+        c.doseRate.toFixed(3), c.rateLabel, s.idx, s.len, s.wid, s.depth,
+        s.dose, s.eqsq === null ? '' : s.eqsq.toFixed(2), s.of.toFixed(3), c.technique==='SSD' ? s.df.toFixed(2) : s.df.toFixed(3),
+        manual, s.time.toFixed(2), c.totalTime.toFixed(2)
+      ].map(csvCell).join(','));
+    });
+  });
+  const blob = new Blob(['\uFEFF' + lines.join('\r\n')], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+
+// ---------- NEW CALCULATION ----------
+$('newCalcBtn').addEventListener('click', () => {
+  if (!confirm('Clear the patient details, prescription and all fields for a new calculation? Saved records are not affected.')) return;
+  ['ptRtNo','ptName','ptDiagnosis','totalDose','numFractions'].forEach(id => { $(id).value = ''; });
+  $('numFieldsShare').value = '1';
+  $('doseUnit').value = 'Gy';
+  $('ptDate').value = todayISO();
+  $('fieldsContainer').innerHTML = '';
+  fieldCount = 0;
+  addField();
+  LAST_CALC = null;
+  hideResult();
+  $('errorBox').style.display = 'none';
+  updatePrescriptionPreview();
+  syncDateToRate();
+  refreshResultPatient();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+});
+
+// ---------- DECAY CHART ----------
+function drawChart(){
+  const svg = $('decayChart');
+  const rates = TECHNIQUE==='SSD' ? SSD_DOSE_RATE_2026 : SAD_DOSE_RATE_2026;
+  const w = 640, h = 130, padL = 40, padB = 20, padT = 10;
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const maxV = Math.max(...rates), minV = Math.min(...rates);
+  const x = i => padL + i*((w-padL-10)/(rates.length-1));
+  const y = v => padT + (1-(v-minV)/(maxV-minV))*(h-padT-padB);
+  let path = rates.map((v,i)=> (i===0?'M':'L') + x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
+  let dots = rates.map((v,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="2.5" fill="#8B6269"/>`).join('');
+  let labels = months.map((m,i)=>`<text x="${x(i).toFixed(1)}" y="${h-4}" text-anchor="middle" class="axis-label">${m}</text>`).join('');
+  svg.innerHTML = `<path d="${path}" fill="none" stroke="#252D35" stroke-width="2"/>${dots}${labels}
+    <text x="4" y="${y(maxV).toFixed(1)}" class="axis-label">${maxV}</text>
+    <text x="4" y="${y(minV).toFixed(1)}" class="axis-label">${minV}</text>`;
+}
+
+// ---------- START-UP ----------
+RECORDS = loadRecords();
+renderRecords();
+$('ptDate').value = todayISO();
+addField({len:16, wid:16, depth:9, dose:100});
+syncDateToRate();
+drawChart();
+</script>
+</body>
+</html>
